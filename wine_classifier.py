@@ -26,6 +26,8 @@ def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
     # the function
     ## Wait so this function should somehow come with two features as a return result?
+    ## Or is this us displaying 13x13 then manually choosing, and then pass what we choose as an arg
+    ## and then return the reduced data..?
     return []
 
 

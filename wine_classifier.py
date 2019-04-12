@@ -28,6 +28,12 @@ def feature_selection(train_set, train_labels, **kwargs):
     ## Wait so this function should somehow come with two features as a return result?
     ## Or is this us displaying 13x13 then manually choosing, and then pass what we choose as an arg
     ## and then return the reduced data..?
+
+    ### attempt to display 13 x 13 things
+    n_features = train_set.shape[1]
+    fig, ax = plt.subplots(n_features, n_features)
+    plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0.2, hspace=0.4)
+    plt.show()
     return []
 
 

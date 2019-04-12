@@ -25,9 +25,21 @@ MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']
 def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
     # the function
+
+
+
+    """
     ## Wait so this function should somehow come with two features as a return result?
     ## Or is this us displaying 13x13 then manually choosing, and then pass what we choose as an arg
     ## and then return the reduced data..?
+    
+    So from what I can tell we have to-
+    * plot the pairwise combinations of features
+    * manually choose two features
+    * talk about why we chose them in the report + put pics of the plot
+    * return the two features that are selected here (not sure if we return the string or the reduced matrix?)
+    """
+
 
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]

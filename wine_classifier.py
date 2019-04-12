@@ -32,7 +32,16 @@ def feature_selection(train_set, train_labels, **kwargs):
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]
     fig, ax = plt.subplots(n_features, n_features)
-    plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0.2, hspace=0.4)
+
+    class_1_colour = r'#3366ff'
+    class_2_colour = r'#cc3300'
+    class_3_colour = r'#ffc34d'
+
+    colours = np.zeros_like(train_labels, dtype=np.object)
+    colours[train_labels == 1] = class_1_colour
+    colours[train_labels == 2] = class_2_colour
+    colours[train_labels == 3] = class_3_colour
+    
     plt.show()
     return []
 
@@ -84,7 +93,6 @@ if __name__ == '__main__':
                                                                        train_labels_path=args.train_labels_path,
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
-    print(train_set)
     if mode == 'feature_sel':
         selected_features = feature_selection(train_set, train_labels)
         print_features(selected_features)

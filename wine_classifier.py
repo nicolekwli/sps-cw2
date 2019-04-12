@@ -25,6 +25,7 @@ MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']
 def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
     # the function
+    ## Wait so this function should somehow come with two features as a return result?
     return []
 
 
@@ -75,6 +76,7 @@ if __name__ == '__main__':
                                                                        train_labels_path=args.train_labels_path,
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
+    print(train_set)
     if mode == 'feature_sel':
         selected_features = feature_selection(train_set, train_labels)
         print_features(selected_features)

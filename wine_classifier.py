@@ -26,13 +26,11 @@ def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
     # the function
 
-
-
     """
     ## Wait so this function should somehow come with two features as a return result?
     ## Or is this us displaying 13x13 then manually choosing, and then pass what we choose as an arg
     ## and then return the reduced data..?
-    
+
     So from what I can tell we have to-
     * plot the pairwise combinations of features
     * manually choose two features
@@ -40,21 +38,49 @@ def feature_selection(train_set, train_labels, **kwargs):
     * return the two features that are selected here (not sure if we return the string or the reduced matrix?)
     """
 
-
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]
-    fig, ax = plt.subplots(n_features, n_features)
-
-    class_1_colour = r'#3366ff'
-    class_2_colour = r'#cc3300'
-    class_3_colour = r'#ffc34d'
+    #fig, ax = plt.subplots(n_features, n_features)
+    fig, ax = plt.subplots(4, 5)
 
     colours = np.zeros_like(train_labels, dtype=np.object)
-    colours[train_labels == 1] = class_1_colour
-    colours[train_labels == 2] = class_2_colour
-    colours[train_labels == 3] = class_3_colour
+    colours[train_labels == 1] = CLASS_1_C
+    colours[train_labels == 2] = CLASS_2_C
+    colours[train_labels == 3] = CLASS_3_C
     
+    # Gets features 1-4 vs 1-4 | A vs A
+    """
+    for row in range(0, n_features):
+        for col in range(0, n_features):
+            ax.scatter(train_set[:, row], train_set[:, col], s=10, c=colours)
+            ax.set_title('Features {} vs {}'.format(row+1, col+1))
+            print("here")
+            # was trying to display each individual plot here
+            plt.show()
+    """
+
+    # Gets features 1-4 vs 5-8 | A vs B
+    for row in range(0, 4):
+        for col in range(0, 5):
+            ax[row][col].scatter(train_set[:, row], train_set[:, col+8], c=colours)
+            ax[row][col].set_title('Features {} vs {}'.format(row+1, col+9))
+    
+    # Set A: 1-4
+    #     B: 5-8
+    #     C: 9-13
+    # also A vs A, A vs B
+    # Gets features A vs C
+    # Gets features C vs C
+    # Gets features C vs A
+    # Gets features B vs A
+    # Gets features B vs B
+    # Gets features B vs C
+    # Gets features C vs B 
+    # so should be 9 diff plots
+    # Unless we do a split like A 1-6 and B 7-13 ?
+
     plt.show()
+
     return []
 
 

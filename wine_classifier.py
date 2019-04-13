@@ -21,6 +21,86 @@ CLASS_3_C = r'#ffc34d'
 
 MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']    
 
+'''
+FUNCTIONS FOR K-NN ---------------------------------------------------------------------------
+'''
+def reduce_data(train_set, test_set, selected_features):
+    # the following are (n, 2) arrays
+    train_set_red = train_set[:, selected_features]
+    test_set_red = test_set[:, selected_features]
+
+    return train_set_red, test_set_red
+
+def calculate_centroids(train_set, train_labels):
+    classes = np.unique(train_labels)
+    centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
+    #print(train_set)
+    #print(train_set[train_labels == 3, :])
+    #print(train_labels)
+    
+    return centroids, classes
+
+def nearest_centroid(centroids, test_set):
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+    centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
+    predicted = np.argmin([centroid_dist(p) for p in test_set], axis=1).astype(np.int) + 1
+    
+    return predicted
+
+'''
+FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
+'''    
+
+def calculate_accuracy(gt_labels, pred_labels):
+    correct = 0
+    wrong = 0
+    for i in range (len(gt_labels)):
+        if (gt_labels[i] == pred_labels[i]):
+            correct+=1
+        else:
+            wrong+=1
+    acc = correct / len(gt_labels)
+    return acc
+
+def percentage(gt_labels, pred_labels, classNum, isDiag):
+    correct = 0
+    wrong = 0
+    total = 0
+    #print(classNum)
+    for i in range (len(gt_labels)):
+        # go through this
+        if (gt_labels[i] == classNum):
+            total += 1
+            if (pred_labels[i] == classNum):
+                correct+=1
+            else:
+                wrong+=1
+
+    if (isDiag):
+        percentage = correct / total
+    else:
+        percentage = wrong / total
+
+    return percentage
+
+def calculate_confusion_matrix(gt_labels, pred_labels):
+
+    gtClasses = np.unique(gt_labels)
+    predClasses = np.unique(pred_labels)
+    
+    confuMatrix = np.zeros((len(gtClasses), len(gtClasses)))
+    
+    for row in gtClasses: 
+        for col in gtClasses:
+            if (row == col):
+                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, True)
+            else:
+                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False)
+    return confuMatrix
+
+'''
+FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
+'''
 
 def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
@@ -38,10 +118,6 @@ def feature_selection(train_set, train_labels, **kwargs):
     * return the two features that are selected here (not sure if we return the string or the reduced matrix?)
     """
 
-    '''
-    **kwargs should be the features we select, so what we return should be the reduced matrix
-    i think.
-    '''
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]
 
@@ -141,9 +217,17 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
 
-    
+    '''
+    predict the class of a given unknown sample
+    Use 'accuracy' to evaluate your classifier on the test set
+    Use k∈{1,2,3,4,5,7} and discuss how results vary according to k on report
+    Calculate the confusion matrix to discuss how the classifier behaves according to the three different classes
+    You may either choose a single k for your discussion or show how the confusion matrix changes according to k
+    both approaches are valid and we leave this decision to you
+    '''
 
     # return predictions...?
+    # this should also be a (1, n) or (n, 1) array
     return []
 
 

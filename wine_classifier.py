@@ -38,10 +38,36 @@ def feature_selection(train_set, train_labels, **kwargs):
     * return the two features that are selected here (not sure if we return the string or the reduced matrix?)
     """
 
+
+    '''
+    **kwargs should be the features we select, so what we return should be the reduced matrix
+    i think.
+    '''
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]
     #fig, ax = plt.subplots(n_features, n_features)
-    fig, ax = plt.subplots(4, 5)
+    '''
+    first 5 rows
+    '''
+    fig, ax = plt.subplots(5, 5)
+    fig, ax1 = plt.subplots(5, 5)
+    fig, ax2 = plt.subplots(5, 3)
+
+    '''
+    next 5 rows
+    '''
+    fig, ax3 = plt.subplots(5, 5)
+    fig, ax4 = plt.subplots(5, 5)
+    fig, ax5 = plt.subplots(5, 3)
+
+    '''
+    last 3 rows
+    '''
+    fig, ax6 = plt.subplots(3, 5)
+    fig, ax7 = plt.subplots(3, 5)
+    fig, ax8 = plt.subplots(3, 3)
+
+    plt.subplots_adjust(left=0.1, right=0.99)
 
     colours = np.zeros_like(train_labels, dtype=np.object)
     colours[train_labels == 1] = CLASS_1_C
@@ -60,10 +86,12 @@ def feature_selection(train_set, train_labels, **kwargs):
     """
 
     # Gets features 1-4 vs 5-8 | A vs B
+    '''
     for row in range(0, 4):
         for col in range(0, 5):
             ax[row][col].scatter(train_set[:, row], train_set[:, col+8], c=colours)
             ax[row][col].set_title('Features {} vs {}'.format(row+1, col+9))
+    '''
     
     # Set A: 1-4
     #     B: 5-8
@@ -78,6 +106,61 @@ def feature_selection(train_set, train_labels, **kwargs):
     # Gets features C vs B 
     # so should be 9 diff plots
     # Unless we do a split like A 1-6 and B 7-13 ?
+
+    '''
+    This is 5 rows x 13 columns
+    '''
+    for row in range(0, 5):
+        for col in range(0, 5):
+            ax[row][col].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax[row][col].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(0, 5):
+        for col in range(5, 10):
+            ax1[row][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax1[row][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(0, 5):
+        for col in range(10, 13):
+            ax2[row][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax2[row][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    '''
+    next 5 rows x 13 columns
+    '''
+    for row in range(5, 10):
+        for col in range(0, 5):
+            ax3[row-5][col].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax3[row-5][col].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(5, 10):
+        for col in range(5, 10):
+            ax4[row-5][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax4[row-5][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(5, 10):
+        for col in range(10, 13):
+            ax5[row-5][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax5[row-5][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    '''
+    last 3 rows x 13 columns
+    '''
+    for row in range(10, 13):
+        for col in range(0, 5):
+            ax6[row-10][col].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax6[row-10][col].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(10, 13):
+        for col in range(5, 10):
+            ax7[row-10][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax7[row-10][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
+
+    for row in range(10, 13):
+        for col in range(10, 13):
+            ax8[row-10][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
+            ax8[row-10][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
+
 
     plt.show()
 

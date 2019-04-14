@@ -21,87 +21,6 @@ CLASS_3_C = r'#ffc34d'
 
 MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']    
 
-'''
-FUNCTIONS FOR K-NN ---------------------------------------------------------------------------
-'''
-def reduce_data(train_set, test_set, selected_features):
-    # the following are (n, 2) arrays
-    train_set_red = train_set[:, selected_features]
-    test_set_red = test_set[:, selected_features]
-
-    return train_set_red, test_set_red
-
-def calculate_centroids(train_set, train_labels):
-    classes = np.unique(train_labels)
-    centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
-    #print(train_set)
-    #print(train_set[train_labels == 3, :])
-    #print(train_labels)
-    
-    return centroids, classes
-
-def nearest_centroid(centroids, test_set):
-    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
-    centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
-    predicted = np.argmin([centroid_dist(p) for p in test_set], axis=1).astype(np.int) + 1
-    
-    return predicted
-
-'''
-FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
-'''    
-
-def calculate_accuracy(gt_labels, pred_labels):
-    correct = 0
-    wrong = 0
-    for i in range (len(gt_labels)):
-        if (gt_labels[i] == pred_labels[i]):
-            correct+=1
-        else:
-            wrong+=1
-    acc = correct / len(gt_labels)
-    return acc
-
-def percentage(gt_labels, pred_labels, classNum, isDiag):
-    correct = 0
-    wrong = 0
-    total = 0
-    #print(classNum)
-    for i in range (len(gt_labels)):
-        # go through this
-        if (gt_labels[i] == classNum):
-            total += 1
-            if (pred_labels[i] == classNum):
-                correct+=1
-            else:
-                wrong+=1
-
-    if (isDiag):
-        percentage = correct / total
-    else:
-        percentage = wrong / total
-
-    return percentage
-
-def calculate_confusion_matrix(gt_labels, pred_labels):
-
-    gtClasses = np.unique(gt_labels)
-    predClasses = np.unique(pred_labels)
-    
-    confuMatrix = np.zeros((len(gtClasses), len(gtClasses)))
-    
-    for row in gtClasses: 
-        for col in gtClasses:
-            if (row == col):
-                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, True)
-            else:
-                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False)
-    return confuMatrix
-
-'''
-FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
-'''
-
 def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of 
     # the function
@@ -213,6 +132,36 @@ def feature_selection(train_set, train_labels, **kwargs):
     return [6, 12]
 
 
+'''
+FUNCTIONS FOR K-NN ---------------------------------------------------------------------------
+'''
+def reduce_data(train_set, test_set, selected_features):
+    # the following are (n, 2) arrays
+    train_set_red = train_set[:, selected_features]
+    test_set_red = test_set[:, selected_features]
+
+    return train_set_red, test_set_red
+
+def calculate_centroids(train_set, train_labels):
+    classes = np.unique(train_labels)
+    centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
+    #print(train_set)
+    #print(train_set[train_labels == 3, :])
+    #print(train_labels)
+    
+    return centroids, classes
+
+def nearest_centroid(centroids, test_set):
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+    centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
+    predicted = np.argmin([centroid_dist(p) for p in test_set], axis=1).astype(np.int) + 1
+    
+    return predicted
+
+def distanceTo(point, trainPoint):
+    return None
+
+
 def knn(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
@@ -225,10 +174,85 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     You may either choose a single k for your discussion or show how the confusion matrix changes according to k
     both approaches are valid and we leave this decision to you
     '''
+    # Step 0.1: I'm guessing we need a list of k values
+    k = [1,2,3,4,5,7]
+    # Step 0.2: I'm guessing we need to reduce them
+    train_set_red, test_set_red = reduce_data(train_set, test_set, [6,12])
 
+    # Step 1: Calculate each new data to all other training points (distance can by any type)
+    # so instead of all other training points we use the centroids...? 
+    # for i in range(len(train_set_red)):
+
+
+    # Step 2: selects the K-nearest data points
+    # check which class the k number of points are close to, selects majority class
+
+    # Step 3: assigns the data point to the class to which the majority of the K data points belong
+
+    centroids, classes = calculate_centroids(train_set_red, train_labels)
+    predData = nearest_centroid(centroids, test_set_red)
+    print(predData)
     # return predictions...?
     # this should also be a (1, n) or (n, 1) array
     return []
+
+'''
+FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
+'''    
+
+def calculate_accuracy(gt_labels, pred_labels):
+    correct = 0
+    wrong = 0
+    for i in range (len(gt_labels)):
+        if (gt_labels[i] == pred_labels[i]):
+            correct+=1
+        else:
+            wrong+=1
+    acc = correct / len(gt_labels)
+    return acc
+
+def percentage(gt_labels, pred_labels, classNum, isDiag):
+    correct = 0
+    wrong = 0
+    total = 0
+    #print(classNum)
+    for i in range (len(gt_labels)):
+        # go through this
+        if (gt_labels[i] == classNum):
+            total += 1
+            if (pred_labels[i] == classNum):
+                correct+=1
+            else:
+                wrong+=1
+
+    if (isDiag):
+        percentage = correct / total
+    else:
+        percentage = wrong / total
+
+    return percentage
+
+def calculate_confusion_matrix(gt_labels, pred_labels):
+
+    gtClasses = np.unique(gt_labels)
+    predClasses = np.unique(pred_labels)
+    
+    confuMatrix = np.zeros((len(gtClasses), len(gtClasses)))
+    
+    for row in gtClasses: 
+        for col in gtClasses:
+            if (row == col):
+                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, True)
+            else:
+                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False)
+    return confuMatrix
+
+'''
+FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
+'''
+
+
+
 
 
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
@@ -272,6 +296,7 @@ if __name__ == '__main__':
                                                                        train_labels_path=args.train_labels_path,
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
+    
     if mode == 'feature_sel':
         selected_features = feature_selection(train_set, train_labels)
         print_features(selected_features)

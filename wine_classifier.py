@@ -323,6 +323,9 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,9,12])
+    print(reduced_train)
+    print(reduced_test)
     return []
 
 
@@ -355,9 +358,6 @@ if __name__ == '__main__':
                                                                        train_labels_path=args.train_labels_path,
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
-    
-    # knn(train_set, train_labels, test_set, 2)
-
 
     if mode == 'feature_sel':
         selected_features = feature_selection(train_set, train_labels)

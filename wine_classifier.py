@@ -131,136 +131,6 @@ def feature_selection(train_set, train_labels, **kwargs):
     # The indices are 6 and 12
     return [6, 12]
 
-
-'''
-FUNCTIONS FOR K-NN ---------------------------------------------------------------------------
-'''
-def reduce_data(train_set, test_set, selected_features):
-    # the following are (n, 2) arrays
-    train_set_red = train_set[:, selected_features]
-    test_set_red = test_set[:, selected_features]
-
-    return train_set_red, test_set_red
-
-def calculate_centroids(train_set, train_labels):
-    classes = np.unique(train_labels)
-    centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
-    
-    return centroids, classes
-
-# might not need this function in this form lol
-def nearest_centroid(centroids, test_set):
-    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
-    centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
-    predicted = np.argmin([centroid_dist(p) for p in test_set], axis=1).astype(np.int) + 1
-    
-    return predicted
-
-'''
-def distance(point, trainPoint):
-    # so we already have this function but oh well we can make our own
-    dist = 0
-    dist = np.square(data1[x] - data2[x])
-    
-    return np.sqrt(dist)
-'''
-
-def knn(train_set, train_labels, test_set, k, **kwargs):
-    # write your code here and make sure you return the predictions at the end of 
-    # the function
-    print("hello")
-    
-
-    '''
-    predict the class of a given unknown sample
-    Use 'accuracy' to evaluate your classifier on the test set
-    Use k∈{1,2,3,4,5,7} and discuss how results vary according to k on report
-    Calculate the confusion matrix to discuss how the classifier behaves according to the three different classes
-    You may either choose a single k for your discussion or show how the confusion matrix changes according to k
-    both approaches are valid and we leave this decision to you
-    '''
-    # Step 0.1: I'm guessing we need a list of k values
-    # -> dont think so because k is being passed as argument to this function 
-
-    # Step 0.2: Reduce the data
-    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
-    print(reduced_train)
-    predicted = np.zeros(reduced_test.shape[0])
-
-    # Step 1: Calculate each new data to all other training points (distance can by any type)
-
-    # Step 2: selects the K-nearest data points
-    # check which class the k number of points are close to, selects majority class
-
-    # Step 3: assigns the data point to the class to which the majority of the K data points belong
-
-    #func to find the dist
-    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
-    #rint(reduced_train.shape)
-    #print(reduced_train.shape[0])
-     
-    #iterate from 1 to total number of training data points
-    for i in range(0, reduced_test.shape[0]):
-        #for j in range(0, reduced_test.shape[1]):
-        # store the current test data point
-
-        '''I am questioning this'''
-        '''This would be selecting just one data.... it could work, but how to choose class...?'''
-        # testPoint = reduced_test[i][j]
-        testPoint = reduced_test[i]
-        print("testpoint")
-        print(testPoint)
-
-        #Calculate the distance between test data and each row of training data.
-        #Should return the array with all the dist from testPoint to every train point
-        #(lets ignore this chaos)(i think i understand it) 
-        # dist_test_to_train = lambda x : [dist(x, train) for train in reduced_train]
-
-        #for k in range(0, reduced_test.shape[0]):
-        #    dist_test_to_train = dist(testPoint, reduced_test[k]) # this should send the test point and a row?
-
-        dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
-        
-        # print(dist_test_to_train(testPoint))
-        results = dist_test_to_train(testPoint)
-        #print("RESULT")
-        #print(results)
-        #print(len(results))
-        #print(reduced_test.shape[0])
-        
-        #Sort the calculated distances in ascending order based on distance values
-        # This is to order the elements in nearest to furthest
-        # HOW DO YOU KNOW WHICH DISTANCE REFERS TO WHICH THO
-        # can't we just selected minimum k distances
-
-        # sortedDist = np.sort(results)
-        closestIndexs = np.argsort(results)[:k]
-        print(closestIndexs)
-        
-        #Get top k rows from the sorted array
-        #for count in range(0, k):
-        #    kNeighbours[count] = sortedDist[count]
-    
-        #Get the most frequent class of these rows
-        #predicted[i] = most frequent class from the list kNeighbours
-        classes = []
-        freqClass = []
-        for index in closestIndexs:
-            classes.append(train_labels[index])
-        print("classes")
-        print(classes)
-
-        # PICK THE MOST FRQUEST CLASS 
-        freqClass = np.bincount(classes)
-            
-        print(i)
-        predicted[i] = np.argmax(freqClass)
-
-    # return predictions...?
-    # this should also be a (1, n) or (n, 1) array
-    # ----------- All should be working up till here ------------------------
-    return predicted
-
 '''
 FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
 '''    
@@ -313,19 +183,143 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
     return confuMatrix
 
 '''
-FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
+FUNCTIONS FOR K-NN ---------------------------------------------------------------------------
+'''
+def reduce_data(train_set, test_set, selected_features):
+    # the following are (n, 2) arrays
+    train_set_red = train_set[:, selected_features]
+    test_set_red = test_set[:, selected_features]
+
+    return train_set_red, test_set_red
+
+def calculate_centroids(train_set, train_labels):
+    classes = np.unique(train_labels)
+    centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
+    
+    return centroids, classes
+
+# might not need this function in this form lol
+def nearest_centroid(centroids, test_set):
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+    centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
+    predicted = np.argmin([centroid_dist(p) for p in test_set], axis=1).astype(np.int) + 1
+    
+    return predicted
+
+'''
+def distance(point, trainPoint):
+    # so we already have this function but oh well we can make our own
+    dist = 0
+    dist = np.square(data1[x] - data2[x])
+    
+    return np.sqrt(dist)
 '''
 
+def knn(train_set, train_labels, test_set, k, **kwargs):
+    '''
+    predict the class of a given unknown sample
+    Use 'accuracy' to evaluate your classifier on the test set
+    Use k∈{1,2,3,4,5,7} and discuss how results vary according to k on report
+    Calculate the confusion matrix to discuss how the classifier behaves according to the three different classes
+    You may either choose a single k for your discussion or show how the confusion matrix changes according to k
+    both approaches are valid and we leave this decision to you
+    '''
+    # Step 0.1: I'm guessing we need a list of k values
+    # -> dont think so because k is being passed as argument to this function 
 
+    # Step 0.2: Reduce the data
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
+    print(reduced_train)
+    predicted = np.zeros(reduced_test.shape[0])
 
+    # Step 1: Calculate each new data to all other training points (distance can by any type)
 
+    # Step 2: selects the K-nearest data points
+    # check which class the k number of points are close to, selects majority class
 
+    # Step 3: assigns the data point to the class to which the majority of the K data points belong
+
+    #func to find the dist
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+    #rint(reduced_train.shape)
+    #print(reduced_train.shape[0])
+     
+    #iterate from 1 to total number of training data points
+    for i in range(0, reduced_test.shape[0]):
+        #for j in range(0, reduced_test.shape[1]):
+        # store the current test data point
+
+        '''I am questioning this'''
+        '''This would be selecting just one data.... it could work, but how to choose class...?'''
+        # testPoint = reduced_test[i][j]
+        testPoint = reduced_test[i]
+        #print("testpoint")
+        #print(testPoint)
+
+        #Calculate the distance between test data and each row of training data.
+        #Should return the array with all the dist from testPoint to every train point
+        #(lets ignore this chaos)(i think i understand it) 
+        # dist_test_to_train = lambda x : [dist(x, train) for train in reduced_train]
+
+        #for k in range(0, reduced_test.shape[0]):
+        #    dist_test_to_train = dist(testPoint, reduced_test[k]) # this should send the test point and a row?
+
+        dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
+        
+        # print(dist_test_to_train(testPoint))
+        results = dist_test_to_train(testPoint)
+        #print("RESULT")
+        #print(results)
+        #print(len(results))
+        #print(reduced_test.shape[0])
+        
+        #Sort the calculated distances in ascending order based on distance values
+        # This is to order the elements in nearest to furthest
+        # HOW DO YOU KNOW WHICH DISTANCE REFERS TO WHICH THO
+        # can't we just selected minimum k distances
+
+        # sortedDist = np.sort(results)
+        closestIndexs = np.argsort(results)[:k]
+        #print(closestIndexs)
+        
+        #Get top k rows from the sorted array
+        #for count in range(0, k):
+        #    kNeighbours[count] = sortedDist[count]
+    
+        #Get the most frequent class of these rows
+        #predicted[i] = most frequent class from the list kNeighbours
+        classes = []
+        freqClass = []
+        for index in closestIndexs:
+            classes.append(train_labels[index])
+        #print("classes")
+        #print(classes)
+
+        # PICK THE MOST FRQUEST CLASS 
+        freqClass = np.bincount(classes)
+            
+        #print(i)
+        predicted[i] = np.argmax(freqClass)
+
+    print(type(predicted))
+    # ----------- ACCURACY --------------------------------------------------
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
+    # ----------- All should be working up till here ------------------------
+    # ----------- CONFUSION MATRIX ------------------------------------------
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX")
+    print(confuMat)
+
+    return predicted
+
+'''
+FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
+'''
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
     return []
-
-
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
@@ -369,7 +363,7 @@ if __name__ == '__main__':
         selected_features = feature_selection(train_set, train_labels)
         print_features(selected_features)
     elif mode == 'knn':
-        predictions = knn(train_set, train_labels, test_set, args.k)
+        predictions = knn(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)
     elif mode == 'alt':
         predictions = alternative_classifier(train_set, train_labels, test_set)

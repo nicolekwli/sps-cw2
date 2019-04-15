@@ -145,12 +145,10 @@ def reduce_data(train_set, test_set, selected_features):
 def calculate_centroids(train_set, train_labels):
     classes = np.unique(train_labels)
     centroids = np.array([np.mean(train_set[train_labels == c, :], axis=0) for c in classes])
-    #print(train_set)
-    #print(train_set[train_labels == 3, :])
-    #print(train_labels)
     
     return centroids, classes
 
+# might not need this function in this form lol
 def nearest_centroid(centroids, test_set):
     dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
     centroid_dist = lambda x : [dist(x, centroid) for centroid in centroids]
@@ -158,13 +156,19 @@ def nearest_centroid(centroids, test_set):
     
     return predicted
 
-def distanceTo(point, trainPoint):
-    return None
-
+'''
+def distance(point, trainPoint):
+    # so we already have this function but oh well we can make our own
+    dist = 0
+    dist = np.square(data1[x] - data2[x])
+    
+    return np.sqrt(dist)
+'''
 
 def knn(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
+    print("hello")
 
     '''
     predict the class of a given unknown sample
@@ -175,26 +179,49 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     both approaches are valid and we leave this decision to you
     '''
     # Step 0.1: I'm guessing we need a list of k values
-    k = [1,2,3,4,5,7]
-    # Step 0.2: I'm guessing we need to reduce them
-    train_set_red, test_set_red = reduce_data(train_set, test_set, [6,12])
+    # -> dont think so because k is being passed as argument to this function 
+
+    # Step 0.2: Reduce the data
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
 
     # Step 1: Calculate each new data to all other training points (distance can by any type)
-    # so instead of all other training points we use the centroids...? 
+    # so instead of all other training points we use the centroids...? nahh
     # for i in range(len(train_set_red)):
-
 
     # Step 2: selects the K-nearest data points
     # check which class the k number of points are close to, selects majority class
 
     # Step 3: assigns the data point to the class to which the majority of the K data points belong
 
-    centroids, classes = calculate_centroids(train_set_red, train_labels)
-    predData = nearest_centroid(centroids, test_set_red)
-    print(predData)
+    #func to find the dist
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+     
+    #iterate from 1 to total number of training data points
+    for i in range(0, reduced_test.shape[0]):
+        for j in range(0, reduced_test.shape[0]):
+            # store the current test data point
+            testPoint = reduced_test[i][j]
+
+            #Calculate the distance between test data and each row of training data.
+            #Should return the array with all the dist from testPoint to every train point
+            #(lets ignore this chaos) dist_test_to_train = lambda x : [dist(x, train) for train in reduced_train]
+            for k in range(0, reduced_train.shape[0]):
+                dist_test_to_train = dist(testPoint, reduced_test[k]) # this should send the test point and a row?
+
+            #Sort the calculated distances in ascending order based on distance values
+            # This is to order the elements in nearest to furthest
+            sortedDist = np.sort(dist_test_to_train)
+            
+            #Get top k rows from the sorted array
+            for count in range(0, k):
+                kNeighbours[count] = sortedDist[count]
+        
+            #Get the most frequent class of these rows
+            #predicted[i] = most frequent class from the list kNeighbours
+
     # return predictions...?
     # this should also be a (1, n) or (n, 1) array
-    return []
+    return predicted
 
 '''
 FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
@@ -297,6 +324,9 @@ if __name__ == '__main__':
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
     
+    knn(train_set, train_labels, test_set, 2)
+
+
     if mode == 'feature_sel':
         selected_features = feature_selection(train_set, train_labels)
         print_features(selected_features)

@@ -169,6 +169,7 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
     print("hello")
+    
 
     '''
     predict the class of a given unknown sample
@@ -183,10 +184,10 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
 
     # Step 0.2: Reduce the data
     reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
+    print(reduced_train)
+    predicted = np.zeros(reduced_test.shape[0])
 
     # Step 1: Calculate each new data to all other training points (distance can by any type)
-    # so instead of all other training points we use the centroids...? nahh
-    # for i in range(len(train_set_red)):
 
     # Step 2: selects the K-nearest data points
     # check which class the k number of points are close to, selects majority class
@@ -195,32 +196,69 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
 
     #func to find the dist
     dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+    #rint(reduced_train.shape)
+    #print(reduced_train.shape[0])
      
     #iterate from 1 to total number of training data points
     for i in range(0, reduced_test.shape[0]):
-        for j in range(0, reduced_test.shape[0]):
-            # store the current test data point
-            testPoint = reduced_test[i][j]
+        #for j in range(0, reduced_test.shape[1]):
+        # store the current test data point
 
-            #Calculate the distance between test data and each row of training data.
-            #Should return the array with all the dist from testPoint to every train point
-            #(lets ignore this chaos) dist_test_to_train = lambda x : [dist(x, train) for train in reduced_train]
-            for k in range(0, reduced_train.shape[0]):
-                dist_test_to_train = dist(testPoint, reduced_test[k]) # this should send the test point and a row?
+        '''I am questioning this'''
+        '''This would be selecting just one data.... it could work, but how to choose class...?'''
+        # testPoint = reduced_test[i][j]
+        testPoint = reduced_test[i]
+        print("testpoint")
+        print(testPoint)
 
-            #Sort the calculated distances in ascending order based on distance values
-            # This is to order the elements in nearest to furthest
-            sortedDist = np.sort(dist_test_to_train)
-            
-            #Get top k rows from the sorted array
-            for count in range(0, k):
-                kNeighbours[count] = sortedDist[count]
+        #Calculate the distance between test data and each row of training data.
+        #Should return the array with all the dist from testPoint to every train point
+        #(lets ignore this chaos)(i think i understand it) 
+        # dist_test_to_train = lambda x : [dist(x, train) for train in reduced_train]
+
+        #for k in range(0, reduced_test.shape[0]):
+        #    dist_test_to_train = dist(testPoint, reduced_test[k]) # this should send the test point and a row?
+
+        dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
         
-            #Get the most frequent class of these rows
-            #predicted[i] = most frequent class from the list kNeighbours
+        # print(dist_test_to_train(testPoint))
+        results = dist_test_to_train(testPoint)
+        #print("RESULT")
+        #print(results)
+        #print(len(results))
+        #print(reduced_test.shape[0])
+        
+        #Sort the calculated distances in ascending order based on distance values
+        # This is to order the elements in nearest to furthest
+        # HOW DO YOU KNOW WHICH DISTANCE REFERS TO WHICH THO
+        # can't we just selected minimum k distances
+
+        # sortedDist = np.sort(results)
+        closestIndexs = np.argsort(results)[:k]
+        print(closestIndexs)
+        
+        #Get top k rows from the sorted array
+        #for count in range(0, k):
+        #    kNeighbours[count] = sortedDist[count]
+    
+        #Get the most frequent class of these rows
+        #predicted[i] = most frequent class from the list kNeighbours
+        classes = []
+        freqClass = []
+        for index in closestIndexs:
+            classes.append(train_labels[index])
+        print("classes")
+        print(classes)
+
+        # PICK THE MOST FRQUEST CLASS 
+        freqClass = np.bincount(classes)
+            
+        print(i)
+        predicted[i] = np.argmax(freqClass)
 
     # return predictions...?
     # this should also be a (1, n) or (n, 1) array
+    # ----------- All should be working up till here ------------------------
     return predicted
 
 '''
@@ -324,7 +362,7 @@ if __name__ == '__main__':
                                                                        test_set_path=args.test_set_path,
                                                                        test_labels_path=args.test_labels_path)
     
-    knn(train_set, train_labels, test_set, 2)
+    # knn(train_set, train_labels, test_set, 2)
 
 
     if mode == 'feature_sel':

@@ -10,6 +10,7 @@ to print your results
 from __future__ import print_function
 
 import argparse
+import math
 import numpy as np
 import scipy as sp
 from scipy.stats import norm
@@ -260,7 +261,7 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
 
         predicted[i] = freqClass
     
-    '''
+    
     # ----------- ACCURACY --------------------------------------------------
     accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
     print("ACCURACY: " + str(accuracy))
@@ -274,15 +275,18 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     fig, a = plt.subplots()
     plt.title("Confusion Matrix")
     plot_matrix(confuMat, ax = a)
-    '''
+    
     return predicted
 
 '''
 FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
 '''
-def alternative_classifier(train_set, train_labels, test_set, **kwargs):
-    # Guess this is Naive Bayes Classifier ?
 
+def norm_pdf(x, mean, var):
+    prob = ( 1.0 / ( np.sqrt( 2.0*np.pi*var)) ) * np.exp( (-(x-mean)**2.0) / (2.0 * var) )
+    return prob
+
+def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     """
     feature 1 = Flavanoidsm (this is index 6)
     feature 2 = Proline (this is index 13)
@@ -299,12 +303,10 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     feature1 = reduced_train[:, 0] # flavanoidsm!!!
     feature2 = reduced_train[:, 1] # proline!!!
 
-    # we'll need this later i believe
     test_feature1 = reduced_test[:, 0] # flavanoidsm!!!
     test_feature2 = reduced_test[:, 1] # proline!!!
 
     predicted = np.zeros((reduced_test.shape[0], 1))
-
 
     # Calculating the priors ---------------------------------------------------------
     unique, counts = np.unique(train_labels, return_counts=True)
@@ -319,54 +321,40 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     so the algorithm assumes that likelihood is all normal distributed
     and to get the pdf we need to calc mean and var
     for each class(1/2/3) and feature(flav/proline) combination we need to calc var and mean from the data
-    
-    do i dare aim to store this in a giant table/matrix hmmm yes i do soz
-    feature/class 1   2   3
-          flav(1)     
-       proline(2)
     '''
+
     mean_pairs = np.zeros((2,3))
     var_pairs = np.zeros((2,3))
 
-    # lol this is so weird PLS CHECK THIS 
-    for f in range(0, 2):
-        for c in range(0, 3):
-            if (f == 0): # if f is 0, it means feature 1
-                mean_pairs[f][c] = np.mean([feature1[train_labels == c+1]])
-                var_pairs[f][c] = np.var([feature1[train_labels == c+1]])
+    for f in range(2):
+        for c in range(3):
+            if (f == 0): # feature 1
+                mean_pairs[f][c] = np.mean(feature1[train_labels == c+1])
+                var_pairs[f][c] = np.var(feature1[train_labels == c+1])
 
-            elif (f == 1): # if f is 1, it means feature 2
+            elif (f == 1): # feature 2
                 mean_pairs[f][c] = np.mean([feature2[train_labels == c+1]])
                 var_pairs[f][c] = np.var([feature2[train_labels == c+1]])
 
     # Getting the posteriors for each test point------------------------------------
-    for i in range(0, reduced_test.shape[0]):
-        
-        '''
-        so the idea is: 
-        posterior_for_class1 = p(flav|class1) * p(proline|class1) * p(class1)
-        posterior_for_class2 = p(flav|class2) * p(proline|class2) * p(class2)
-        posterior_for_class3 = p(flav|class3) * p(proline|class3) * p(class3)
-        
-        then:
-        predicted[i] = maximum of (posterior_for_class1, posterior_for_class2, posterior_for_class3 )
-        '''
-        
+    for i in range(reduced_test.shape[0]):
         posterior = [0, 0, 0] # this is the array that will store the probabilities
 
-        f1_given_c1 = norm(mean_pairs[0][0], var_pairs[0][0]).pdf(test_feature1[i])
-        f2_given_c1 = norm(mean_pairs[1][0], var_pairs[1][0]).pdf(test_feature2[i])
+        # f1_given_c1 = norm(mean_pairs[0][0], var_pairs[0][0]).pdf(test_feature1[i])
+        f1_given_c1 = norm_pdf(test_feature1[i], mean_pairs[0][0], var_pairs[0][0])
+        f2_given_c1 = norm_pdf(test_feature2[i], mean_pairs[1][0], var_pairs[1][0])
+
         posterior[0] = f1_given_c1 * f2_given_c1 * prior_class1
         
-        f1_given_c2 = norm(mean_pairs[0][1], var_pairs[0][1]).pdf(test_feature1[i])
-        f2_given_c2 = norm(mean_pairs[1][1], var_pairs[1][1]).pdf(test_feature2[i])
+        f1_given_c2 = norm_pdf(test_feature1[i], mean_pairs[0][1], var_pairs[0][1])
+        f2_given_c2 = norm_pdf(test_feature2[i], mean_pairs[1][1], var_pairs[1][1])
+        
         posterior[1] = f1_given_c2 * f2_given_c2 * prior_class2
         
-        f1_given_c3 = norm(mean_pairs[0][2], var_pairs[0][2]).pdf(test_feature1[i])
-        f2_given_c3 = norm(mean_pairs[1][2], var_pairs[1][2]).pdf(test_feature2[i])
+        f1_given_c3 = norm_pdf(test_feature1[i], mean_pairs[0][2], var_pairs[0][2])
+        f2_given_c3 = norm_pdf(test_feature2[i], mean_pairs[1][2], var_pairs[1][2])
         posterior[2] = f1_given_c3 * f2_given_c3 * prior_class3
-        
-        #print(posterior)
+  
         predicted[i] = np.argmax(posterior) + 1
 
     accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
@@ -379,12 +367,6 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     return predicted
 
-""" 
-    I THINK THIS WORKS?????? 
-    are we actually going w/ feature 9?
-    i wonder how to select a feature
-    do we need to make 
-"""
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
@@ -498,6 +480,7 @@ if __name__ == '__main__':
         print_predictions(predictions)
 
         # some more checkings
+        
         gnb = GaussianNB()
         gnb.fit(train_set[:,[6,12]], train_labels)
         print("comp predicted: ")
@@ -509,8 +492,7 @@ if __name__ == '__main__':
         for i in range(0, predictions.shape[0]):
             if (predictions[i] != comp[i]):
                 print("uh oh", i)
-
-
+        
     elif mode == 'knn_3d':
         predictions = knn_three_features(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)

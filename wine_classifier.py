@@ -315,7 +315,6 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     prior_class2 =  counts[1] / total_no_classes
     prior_class3 =  counts[2] / total_no_classes
 
-
     # Calculating the likelihood -----------------------------------------------------
     '''
     # so the algorithm assumes that likelihood is all normal distributed
@@ -343,29 +342,9 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     #np.mean([feature1[train_labels == c] for c in [1,2,3]]) )
 
-    # also check this LOLOLOL soz
-    likelihoods = np.zeros((2,3))
-    #for f in range(0, 2):
-    #    for c in range(0, 3):
-    #       likelihoods[f][c] = norm(mean_pairs[f][c], var_pairs[f][c]).pdf(feature1)
-
-    # i think the above two for loop pairs can be made into one maybe someday
-
-    #print(likelihoods)
-        # test: feature flav and class 1
-    #lol = norm( np.mean([feature1[train_labels == 1]]), np.var([feature1[train_labels == 1]]) ).pdf(feature1)
-    #print( lol )
-    #print( lol.shape[0] )
-    # so this returns a (125, 1) array 
-
-
-    # Getting the posteriors
-    #posterior_class1_given_feature1 = ()
-
-    
-    print(reduced_test.shape[0])
+    # Getting the posteriors for each test point------------------------------------
     for i in range(0, reduced_test.shape[0]):
-        posterior = [] # this is the array that will store the probabilities
+        posterior = [0,0,0] # this is the array that will store the probabilities
 
         f1_given_c1 = norm(mean_pairs[0][0], var_pairs[0][0]).pdf(test_feature1[i])
         f2_given_c1 = norm(mean_pairs[1][0], var_pairs[1][0]).pdf(test_feature2[i])
@@ -390,17 +369,7 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
         then:
         predicted[i] = maximum of (posterior_for_class1, posterior_for_class2, posterior_for_class3 )
         '''
-    
-    '''
-    Some notes:
 
-    # given x (e.g., feature vector with properties of fish), choose w (e.g., class) 
-    # that maximises posterior probability: argmax w P(w|x)
- 
-    # The prior probability P(w) tells us how likely each of the classes is “a priori"
-
-    #The posterior probability P(w|x) tells us how likely each of the classes is after observing instance x
-    '''
 
     return predicted
 

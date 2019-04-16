@@ -14,6 +14,7 @@ import numpy as np
 import scipy as sp
 from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 import matplotlib.pyplot as plt
 from utilities import load_data, print_features, print_predictions
 
@@ -307,8 +308,6 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     # Calculating the priors ---------------------------------------------------------
     unique, counts = np.unique(train_labels, return_counts=True)
-    #print(unique, counts)
-    #print(train_labels.shape)
     total_no_classes = train_labels.shape[0]
 
     prior_class1 =  counts[0] / total_no_classes
@@ -317,8 +316,8 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     # Calculating the likelihood -----------------------------------------------------
     '''
-    # so the algorithm assumes that likelihood is all normal distributed
-    # for gettting the pdf we need to calc mean and var
+    so the algorithm assumes that likelihood is all normal distributed
+    and to get the pdf we need to calc mean and var
     for each class(1/2/3) and feature(flav/proline) combination we need to calc var and mean from the data
     
     do i dare aim to store this in a giant table/matrix hmmm yes i do soz
@@ -329,7 +328,7 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     mean_pairs = np.zeros((2,3))
     var_pairs = np.zeros((2,3))
 
-    # lol this is so weird PLS CHECK THIS
+    # lol this is so weird PLS CHECK THIS 
     for f in range(0, 2):
         for c in range(0, 3):
             if (f == 0): # if f is 0, it means feature 1
@@ -340,11 +339,20 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
                 mean_pairs[f][c] = np.mean([feature2[train_labels == c+1]])
                 var_pairs[f][c] = np.var([feature2[train_labels == c+1]])
 
-    #np.mean([feature1[train_labels == c] for c in [1,2,3]]) )
-
     # Getting the posteriors for each test point------------------------------------
     for i in range(0, reduced_test.shape[0]):
-        posterior = [0,0,0] # this is the array that will store the probabilities
+        
+        '''
+        so the idea is: 
+        posterior_for_class1 = p(flav|class1) * p(proline|class1) * p(class1)
+        posterior_for_class2 = p(flav|class2) * p(proline|class2) * p(class2)
+        posterior_for_class3 = p(flav|class3) * p(proline|class3) * p(class3)
+        
+        then:
+        predicted[i] = maximum of (posterior_for_class1, posterior_for_class2, posterior_for_class3 )
+        '''
+        
+        posterior = [0, 0, 0] # this is the array that will store the probabilities
 
         f1_given_c1 = norm(mean_pairs[0][0], var_pairs[0][0]).pdf(test_feature1[i])
         f2_given_c1 = norm(mean_pairs[1][0], var_pairs[1][0]).pdf(test_feature2[i])
@@ -358,18 +366,16 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
         f2_given_c3 = norm(mean_pairs[1][2], var_pairs[1][2]).pdf(test_feature2[i])
         posterior[2] = f1_given_c3 * f2_given_c3 * prior_class3
         
+        #print(posterior)
         predicted[i] = np.argmax(posterior) + 1
-        
-        '''
-        so we do: 
-        posterior_for_class1 = p(flav|class1) * p(proline|class1) * p(class1)
-        posterior_for_class2 = p(flav|class2) * p(proline|class2) * p(class2)
-        posterior_for_class3 = p(flav|class3) * p(proline|class3) * p(class3)
-        
-        then:
-        predicted[i] = maximum of (posterior_for_class1, posterior_for_class2, posterior_for_class3 )
-        '''
 
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
+
+    # ----------- CONFUSION MATRIX ------------------------------------------
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
+    print(confuMat)
 
     return predicted
 
@@ -488,8 +494,23 @@ if __name__ == '__main__':
         '''
 
     elif mode == 'alt':
-        predictions = alternative_classifier(train_set, train_labels, test_set)
+        predictions = alternative_classifier(train_set, train_labels, test_set, test_labels=test_labels)
         print_predictions(predictions)
+
+        # some more checkings
+        gnb = GaussianNB()
+        gnb.fit(train_set[:,[6,12]], train_labels)
+        print("comp predicted: ")
+        comp = gnb.predict(test_set[:, [6,12]]) 
+        print( comp )
+        print("comp accuracy: ")
+        print(gnb.score(test_set[:, [6,12]], test_labels, sample_weight=None))
+
+        for i in range(0, predictions.shape[0]):
+            if (predictions[i] != comp[i]):
+                print("uh oh", i)
+
+
     elif mode == 'knn_3d':
         predictions = knn_three_features(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)

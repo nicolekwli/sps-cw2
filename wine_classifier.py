@@ -285,11 +285,9 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
-
     reduced_train, reduced_test = reduce_data(train_set, test_set, [6,9,12])
-    #print(reduced_train)
-    #print(reduced_test)
-
+    print(reduced_train)
+    print(reduced_test)
     return []
 
 

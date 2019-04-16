@@ -351,33 +351,45 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     # i think the above two for loop pairs can be made into one maybe someday
 
-    print(likelihoods)
+    #print(likelihoods)
         # test: feature flav and class 1
-    lol = norm( np.mean([feature1[train_labels == 1]]), np.var([feature1[train_labels == 1]]) ).pdf(feature1)
+    #lol = norm( np.mean([feature1[train_labels == 1]]), np.var([feature1[train_labels == 1]]) ).pdf(feature1)
     #print( lol )
-    print( lol.shape[0] )
+    #print( lol.shape[0] )
     # so this returns a (125, 1) array 
 
 
     # Getting the posteriors
     #posterior_class1_given_feature1 = ()
 
-    '''
+    
     print(reduced_test.shape[0])
-    for testPoint in range(0, reduced_test.shape[0]):
-        posterior_given_feature1 = 0
-        posterior_given_feature2 = 0
+    for i in range(0, reduced_test.shape[0]):
+        posterior = [] # this is the array that will store the probabilities
 
+        f1_given_c1 = norm(mean_pairs[0][0], var_pairs[0][0]).pdf(test_feature1[i])
+        f2_given_c1 = norm(mean_pairs[1][0], var_pairs[1][0]).pdf(test_feature2[i])
+        posterior[0] = f1_given_c1 * f2_given_c1 * prior_class1
         
-        p(flav|class1)
-        p(flav|class2)
-        p(flav|class3)
+        f1_given_c2 = norm(mean_pairs[0][1], var_pairs[0][1]).pdf(test_feature1[i])
+        f2_given_c2 = norm(mean_pairs[1][1], var_pairs[1][1]).pdf(test_feature2[i])
+        posterior[1] = f1_given_c2 * f2_given_c2 * prior_class2
         
-        if (posterior_given_feature1 > posterior_given_feature2):
-            predicted[testPoint] = rip
-
-        print("hi") 
-    '''
+        f1_given_c3 = norm(mean_pairs[0][2], var_pairs[0][2]).pdf(test_feature1[i])
+        f2_given_c3 = norm(mean_pairs[1][2], var_pairs[1][2]).pdf(test_feature2[i])
+        posterior[2] = f1_given_c3 * f2_given_c3 * prior_class3
+        
+        predicted[i] = np.argmax(posterior) + 1
+        
+        '''
+        so we do: 
+        posterior_for_class1 = p(flav|class1) * p(proline|class1) * p(class1)
+        posterior_for_class2 = p(flav|class2) * p(proline|class2) * p(class2)
+        posterior_for_class3 = p(flav|class3) * p(proline|class3) * p(class3)
+        
+        then:
+        predicted[i] = maximum of (posterior_for_class1, posterior_for_class2, posterior_for_class3 )
+        '''
     
     '''
     Some notes:
@@ -390,7 +402,7 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     #The posterior probability P(w|x) tells us how likely each of the classes is after observing instance x
     '''
 
-    return []
+    return predicted
 
 """ 
     I THINK THIS WORKS?????? 

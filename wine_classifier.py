@@ -282,13 +282,65 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     # the function
     return []
 
+""" 
+    I THINK THIS WORKS?????? 
+    are we actually going w/ feature 9?
+    i wonder how to select a feature
+    do we need to make 
+"""
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
-    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,9,12])
-    print(reduced_train)
-    print(reduced_test)
-    return []
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6, 9, 12])
+    #print(reduced_train)
+    #print(reduced_test)
+
+    predicted = np.zeros((reduced_test.shape[0], 1))
+
+    #func to find the dist
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+     
+    # for loop to go through each test points
+    for i in range(0, reduced_test.shape[0]):
+        # store the current test data point
+        testPoint = reduced_test[i]
+
+        #Calculate the distance between test data and each row of training data.
+        dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
+        
+        results = dist_test_to_train(testPoint)
+        
+        # Selecting minimum k distances
+        # sortedDist = np.sort(results)
+        closestIndexs = np.argsort(results)[:k]
+ 
+        #Get the most frequent class of these rows
+        classes = []
+        freqClass = []
+        for index in closestIndexs:
+            classes.append(train_labels[index])
+
+        # PICK THE MOST FRQUEST CLASS 
+        freqClass = np.argmax(np.bincount(classes))
+
+        predicted[i] = freqClass
+
+
+    # ----------- ACCURACY --------------------------------------------------
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
+
+    # ----------- CONFUSION MATRIX ------------------------------------------
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
+    print(confuMat)
+    
+    # Plotting the confu mat
+    fig, a = plt.subplots()
+    plt.title("Confusion Matrix")
+    plot_matrix(confuMat, ax = a)
+
+    return predicted
 
 
 def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
@@ -347,7 +399,7 @@ if __name__ == '__main__':
         predictions = alternative_classifier(train_set, train_labels, test_set)
         print_predictions(predictions)
     elif mode == 'knn_3d':
-        predictions = knn_three_features(train_set, train_labels, test_set, args.k)
+        predictions = knn_three_features(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)
     elif mode == 'knn_pca':
         prediction = knn_pca(train_set, train_labels, test_set, args.k)

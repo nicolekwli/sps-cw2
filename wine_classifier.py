@@ -11,6 +11,8 @@ from __future__ import print_function
 
 import argparse
 import numpy as np
+import scipy as sp
+from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 from utilities import load_data, print_features, print_predictions
@@ -278,8 +280,116 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
 FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
 '''
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
-    # write your code here and make sure you return the predictions at the end of 
-    # the function
+    # Guess this is Naive Bayes Classifier ?
+
+    """
+    feature 1 = Flavanoidsm (this is index 6)
+    feature 2 = Proline (this is index 13)
+    
+    the goal i think:
+    posterior = (likelikood * prior) / evidence
+    aka
+    P(class|test_features) = ( P(train_features|class) * P(class) ) / P(train_features)
+
+    also i think we just ignore the 'evidence' denominator
+    """
+    # Saving the selected features
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
+    feature1 = reduced_train[:, 0] # flavanoidsm!!!
+    feature2 = reduced_train[:, 1] # proline!!!
+
+    # we'll need this later i believe
+    test_feature1 = reduced_test[:, 0] # flavanoidsm!!!
+    test_feature2 = reduced_test[:, 1] # proline!!!
+
+    predicted = np.zeros((reduced_test.shape[0], 1))
+
+
+    # Calculating the priors ---------------------------------------------------------
+    unique, counts = np.unique(train_labels, return_counts=True)
+    #print(unique, counts)
+    #print(train_labels.shape)
+    total_no_classes = train_labels.shape[0]
+
+    prior_class1 =  counts[0] / total_no_classes
+    prior_class2 =  counts[1] / total_no_classes
+    prior_class3 =  counts[2] / total_no_classes
+
+
+    # Calculating the likelihood -----------------------------------------------------
+    '''
+    # so the algorithm assumes that likelihood is all normal distributed
+    # for gettting the pdf we need to calc mean and var
+    for each class(1/2/3) and feature(flav/proline) combination we need to calc var and mean from the data
+    
+    do i dare aim to store this in a giant table/matrix hmmm yes i do soz
+    feature/class 1   2   3
+          flav(1)     
+       proline(2)
+    '''
+    mean_pairs = np.zeros((2,3))
+    var_pairs = np.zeros((2,3))
+
+    # lol this is so weird PLS CHECK THIS
+    for f in range(0, 2):
+        for c in range(0, 3):
+            if (f == 0): # if f is 0, it means feature 1
+                mean_pairs[f][c] = np.mean([feature1[train_labels == c+1]])
+                var_pairs[f][c] = np.var([feature1[train_labels == c+1]])
+
+            elif (f == 1): # if f is 1, it means feature 2
+                mean_pairs[f][c] = np.mean([feature2[train_labels == c+1]])
+                var_pairs[f][c] = np.var([feature2[train_labels == c+1]])
+
+    #np.mean([feature1[train_labels == c] for c in [1,2,3]]) )
+
+    # also check this LOLOLOL soz
+    likelihoods = np.zeros((2,3))
+    #for f in range(0, 2):
+    #    for c in range(0, 3):
+    #       likelihoods[f][c] = norm(mean_pairs[f][c], var_pairs[f][c]).pdf(feature1)
+
+    # i think the above two for loop pairs can be made into one maybe someday
+
+    print(likelihoods)
+        # test: feature flav and class 1
+    lol = norm( np.mean([feature1[train_labels == 1]]), np.var([feature1[train_labels == 1]]) ).pdf(feature1)
+    #print( lol )
+    print( lol.shape[0] )
+    # so this returns a (125, 1) array 
+
+
+    # Getting the posteriors
+    #posterior_class1_given_feature1 = ()
+
+    '''
+    print(reduced_test.shape[0])
+    for testPoint in range(0, reduced_test.shape[0]):
+        posterior_given_feature1 = 0
+        posterior_given_feature2 = 0
+
+        
+        p(flav|class1)
+        p(flav|class2)
+        p(flav|class3)
+        
+        if (posterior_given_feature1 > posterior_given_feature2):
+            predicted[testPoint] = rip
+
+        print("hi") 
+    '''
+    
+    '''
+    Some notes:
+
+    # given x (e.g., feature vector with properties of fish), choose w (e.g., class) 
+    # that maximises posterior probability: argmax w P(w|x)
+ 
+    # The prior probability P(w) tells us how likely each of the classes is “a priori"
+
+    #The posterior probability P(w|x) tells us how likely each of the classes is after observing instance x
+    '''
+
     return []
 
 """ 
@@ -307,9 +417,10 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
 
         #Calculate the distance between test data and each row of training data.
         dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
-        
+
         results = dist_test_to_train(testPoint)
-        
+        #print(len(results))
+
         # Selecting minimum k distances
         # sortedDist = np.sort(results)
         closestIndexs = np.argsort(results)[:k]
@@ -401,6 +512,22 @@ if __name__ == '__main__':
     elif mode == 'knn_3d':
         predictions = knn_three_features(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)
+
+        """
+        # checking things
+        neigh = KNeighborsClassifier(n_neighbors=1)
+        neigh.fit(train_set[:,[6,9,12]], train_labels)
+        print("comp predicted: ")
+        comp = neigh.predict(test_set[:, [6,9,12]]) 
+        print( comp )
+        print("comp accuracy: ")
+        print(neigh.score(test_set[:, [6,9,12]], test_labels, sample_weight=None))
+        
+        for i in range(0, predictions.shape[0]):
+            if (predictions[i] != comp[i]):
+                print("uh oh", i)
+        """
+
     elif mode == 'knn_pca':
         prediction = knn_pca(train_set, train_labels, test_set, args.k)
         print_predictions(prediction)

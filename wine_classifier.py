@@ -152,17 +152,18 @@ def calculate_accuracy(gt_labels, pred_labels):
     return acc
 
 
-def percentage(gt_labels, pred_labels, classNum, isDiag):
+def percentage(gt_labels, pred_labels, classNum, isDiag, otherClassNum=None):
     correct = 0
     wrong = 0
     total = 0
+    percentage = 0
     for i in range (len(gt_labels)):
         # go through this
         if (gt_labels[i] == classNum):
             total += 1
             if (pred_labels[i] == classNum):
                 correct+=1
-            else:
+            elif (pred_labels[i] == otherClassNum):
                 wrong+=1
 
     if (isDiag):
@@ -171,7 +172,6 @@ def percentage(gt_labels, pred_labels, classNum, isDiag):
         percentage = wrong / total
 
     return percentage
-
 
 def calculate_confusion_matrix(gt_labels, pred_labels):
 
@@ -185,7 +185,7 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
             if (row == col):
                 confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, True)
             else:
-                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False)
+                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False, col)
     return confuMatrix
 
 '''

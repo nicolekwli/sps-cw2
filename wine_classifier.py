@@ -16,6 +16,7 @@ import scipy as sp
 from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from utilities import load_data, print_features, print_predictions
 
@@ -404,13 +405,65 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
 
     return predicted
 
-
+'''
+ PCA STUFF WOOT WOOT ------------------------------------------------------------
+'''
 def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
-    # write your code here and make sure you return the predictions at the end of 
-    # the function
-    return []
+    colours = np.zeros_like(train_labels, dtype=np.object)
+    colours[train_labels == 1] = CLASS_1_C
+    colours[train_labels == 2] = CLASS_2_C
+    colours[train_labels == 3] = CLASS_3_C
+
+    # creating PCA object
+    pca = PCA(n_components=2)
+
+    pca.fit(train_set)
+    pca_red_train = pca.transform(train_set)
+    pca_red_test = pca.transform(test_set)
+
+    plt.title("PCA")
+    plt.scatter(pca_red_train[:, 0], pca_red_train[:, 1] * (-1), c=colours, s=100)
+    plt.show()
+
+    # Running knn -----------------------------------------------------------------------
+    '''
+    K VALUE IS HARDCODED SHOULD PROBABLY CHANGE THIS BUT IDK HOW :P
+    '''
+    # SET K HERE:
+    k = 5
+    # ------------------
+    predicted = np.zeros((pca_red_test.shape[0], 1))
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
+     
+    for i in range(0, pca_red_test.shape[0]):
+        testPoint = pca_red_test[i]
+
+        dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in pca_red_train]
+        results = dist_test_to_train(testPoint)
+        closestIndexs = np.argsort(results)[:k]
+ 
+        classes = []
+        freqClass = []
+        for index in closestIndexs:
+            classes.append(train_labels[index])
+
+        freqClass = np.argmax(np.bincount(classes))
+        predicted[i] = freqClass
+    
+    # end of knn ------------------------------------------------------------------------
+
+    # ----------- ACCURACY --------------------------------------------------
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
+
+    
+
+    return predicted
 
 
+'''
+MAIN FUNCTIONS --------------------------------------------------------------------------
+'''
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', nargs=1, type=str, help='Running mode. Must be one of the following modes: {}'.format(MODES))
@@ -495,7 +548,7 @@ if __name__ == '__main__':
         """
 
     elif mode == 'knn_pca':
-        prediction = knn_pca(train_set, train_labels, test_set, args.k)
+        prediction = knn_pca(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(prediction)
     else:
         raise Exception('Unrecognised mode: {}. Possible modes are: {}'.format(mode, MODES))

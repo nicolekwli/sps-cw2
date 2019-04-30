@@ -14,8 +14,6 @@ import math
 import numpy as np
 import scipy as sp
 
-from decimal import *
-
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -44,12 +42,14 @@ def set_colours(train_labels):
 def feature_selection(train_set, train_labels, **kwargs):
     colours = set_colours(train_labels)
 
-    # rip idk where the 3D stuff went oof
-
-
     ### attempt to display 13 x 13 things
     #n_features = train_set.shape[1]
 
+    # this is code for outputting 3d stuff
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(train_set[:, 6], train_set[:, 10], train_set[:, 12], c=colours)
+    plt.show()
 
     # The selected features are 7 and 10
     # The indices are 6 and 9

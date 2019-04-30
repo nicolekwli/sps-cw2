@@ -13,6 +13,10 @@ import argparse
 import math
 import numpy as np
 import scipy as sp
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -24,6 +28,8 @@ from utilities import load_data, print_features, print_predictions
 CLASS_1_C = r'#3366ff'
 CLASS_2_C = r'#cc3300'
 CLASS_3_C = r'#ffc34d'
+
+colours = [CLASS_1_C, CLASS_2_C, CLASS_3_C]
 
 MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']    
 
@@ -45,6 +51,23 @@ def feature_selection(train_set, train_labels, **kwargs):
 
     ### attempt to display 13 x 13 things
     n_features = train_set.shape[1]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    colours = np.zeros_like(train_labels, dtype=np.object)
+    colours[train_labels == 1] = CLASS_1_C
+    colours[train_labels == 2] = CLASS_2_C
+    colours[train_labels == 3] = CLASS_3_C
+
+
+    # this is code for outputting 3d stuff
+    ax.scatter(train_set[:, 6], train_set[:, 10], train_set[:, 12], c=colours)
+    plt.show()
+
+
+
+
 
     """
     '''
@@ -353,6 +376,7 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of 
     # the function
+
     reduced_train, reduced_test = reduce_data(train_set, test_set, [6, 9, 12])
     #print(reduced_train)
     #print(reduced_test)

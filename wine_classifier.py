@@ -14,6 +14,8 @@ import math
 import numpy as np
 import scipy as sp
 
+from decimal import *
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -29,136 +31,29 @@ CLASS_1_C = r'#3366ff'
 CLASS_2_C = r'#cc3300'
 CLASS_3_C = r'#ffc34d'
 
-colours = [CLASS_1_C, CLASS_2_C, CLASS_3_C]
+MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']  
 
-MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']    
+# because the repeated code everywhere is annoying me
+def set_colours(train_labels):
+    colours = np.zeros_like(train_labels, dtype=np.object)
+    colours[train_labels == 1] = CLASS_1_C
+    colours[train_labels == 2] = CLASS_2_C
+    colours[train_labels == 3] = CLASS_3_C
+    return colours
 
 def feature_selection(train_set, train_labels, **kwargs):
-    # write your code here and make sure you return the features at the end of 
-    # the function
+    colours = set_colours(train_labels)
 
-    """
-    ## Wait so this function should somehow come with two features as a return result?
-    ## Or is this us displaying 13x13 then manually choosing, and then pass what we choose as an arg
-    ## and then return the reduced data..?
+    # rip idk where the 3D stuff went oof
 
-    So from what I can tell we have to-
-    * plot the pairwise combinations of features
-    * manually choose two features
-    * talk about why we chose them in the report + put pics of the plot
-    * return the two features that are selected here (not sure if we return the string or the reduced matrix?)
-    """
 
     ### attempt to display 13 x 13 things
-    n_features = train_set.shape[1]
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    colours = np.zeros_like(train_labels, dtype=np.object)
-    colours[train_labels == 1] = CLASS_1_C
-    colours[train_labels == 2] = CLASS_2_C
-    colours[train_labels == 3] = CLASS_3_C
+    #n_features = train_set.shape[1]
 
 
-    # this is code for outputting 3d stuff
-    ax.scatter(train_set[:, 6], train_set[:, 10], train_set[:, 12], c=colours)
-    plt.show()
-
-
-
-
-
-    """
-    '''
-    first 5 rows
-    '''
-    fig, ax = plt.subplots(5, 5)
-    fig, ax1 = plt.subplots(5, 5)
-    fig, ax2 = plt.subplots(5, 3)
-
-    '''
-    next 5 rows
-    '''
-    fig, ax3 = plt.subplots(5, 5)
-    fig, ax4 = plt.subplots(5, 5)
-    fig, ax5 = plt.subplots(5, 3)
-
-    '''
-    last 3 rows
-    '''
-    fig, ax6 = plt.subplots(3, 5)
-    fig, ax7 = plt.subplots(3, 5)
-    fig, ax8 = plt.subplots(3, 3)
-
-    plt.subplots_adjust(left=0.1, right=0.99)
-
-    colours = np.zeros_like(train_labels, dtype=np.object)
-    colours[train_labels == 1] = CLASS_1_C
-    colours[train_labels == 2] = CLASS_2_C
-    colours[train_labels == 3] = CLASS_3_C
-    
-    '''
-    This is 5 rows x 13 columns
-    '''
-    for row in range(0, 5):
-        for col in range(0, 5):
-            ax[row][col].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax[row][col].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(0, 5):
-        for col in range(5, 10):
-            ax1[row][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax1[row][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(0, 5):
-        for col in range(10, 13):
-            ax2[row][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax2[row][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    '''
-    next 5 rows x 13 columns
-    '''
-    for row in range(5, 10):
-        for col in range(0, 5):
-            ax3[row-5][col].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax3[row-5][col].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(5, 10):
-        for col in range(5, 10):
-            ax4[row-5][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax4[row-5][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(5, 10):
-        for col in range(10, 13):
-            ax5[row-5][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax5[row-5][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    '''
-    last 3 rows x 13 columns
-    '''
-    for row in range(10, 13):
-        for col in range(0, 5):
-            ax6[row-10][col].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax6[row-10][col].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(10, 13):
-        for col in range(5, 10):
-            ax7[row-10][col-5].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax7[row-10][col-5].set_title('Features {} vs {}'.format(row+1, col+1))
-
-    for row in range(10, 13):
-        for col in range(10, 13):
-            ax8[row-10][col-10].scatter(train_set[:, row], train_set[:, col], c=colours)
-            ax8[row-10][col-10].set_title('Features {} vs {}'.format(row+1, col+1))
-
-
-    plt.show()
-    """
-
-    # The selected features are 7 and 13
-    # The indices are 6 and 12
-    return [6, 12]
+    # The selected features are 7 and 10
+    # The indices are 6 and 9
+    return [6, 9]
 
 '''
 FUNCTIONS FOR EVALUATING A CLASSIFIER --------------------------------------------------------
@@ -206,9 +101,9 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
     for row in gtClasses: 
         for col in gtClasses:
             if (row == col):
-                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, True)
+                confuMatrix[row-1][col-1] = percentage(gt_labels, pred_labels, row, True)
             else:
-                confuMatrix[row-1][col-1]=percentage(gt_labels, pred_labels, row, False, col)
+                confuMatrix[row-1][col-1] = percentage(gt_labels, pred_labels, row, False, col)
     return confuMatrix
 
 '''
@@ -218,7 +113,6 @@ def reduce_data(train_set, test_set, selected_features):
     # the following are (n, 2) arrays
     train_set_red = train_set[:, selected_features]
     test_set_red = test_set[:, selected_features]
-
     return train_set_red, test_set_red
 
 
@@ -236,6 +130,9 @@ def plot_matrix(matrix, ax=None):
     if ax is None:
         ax = plt.gca()
      
+    #rip
+    matrix = matrix.transpose()
+
     # Plot the colour image 
     cmap=plt.get_cmap('Wistia')    
     image = ax.imshow(matrix, cmap)
@@ -246,14 +143,15 @@ def plot_matrix(matrix, ax=None):
     # Displaying the text
     for i in range(0, matrix.shape[0]):
         for j in range(0, matrix.shape[0]):
-            image.axes.text(i, j, matrix[i][j], horizontalalignment='center', verticalalignment='center', color='black')
+            image.axes.text(i, j, round(matrix[i][j],2), horizontalalignment='center', verticalalignment='center', color='black')
     
     plt.show()
 
 
 def knn(train_set, train_labels, test_set, k, **kwargs):
+    selected_features = [6, 9]
     # Reduce the data
-    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
+    reduced_train, reduced_test = reduce_data(train_set, test_set, selected_features)
 
     predicted = np.zeros((reduced_test.shape[0], 1))
 
@@ -271,7 +169,6 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
         results = dist_test_to_train(testPoint)
         
         # Selecting minimum k distances
-        # sortedDist = np.sort(results)
         closestIndexs = np.argsort(results)[:k]
  
         #Get the most frequent class of these rows
@@ -297,7 +194,7 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     
     # Plotting the confu mat
     fig, a = plt.subplots()
-    plt.title("Confusion Matrix")
+    plt.title("k = {}".format(k))
     plot_matrix(confuMat, ax = a)
     
     return predicted
@@ -307,15 +204,14 @@ FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------
 '''
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     """
-    BAYES BOIS
-    the goal i think:
+    NAIVE BAYES CLASSIFIER
     posterior = (likelikood * prior) / evidence
     P(class|test_features) = ( P(train_features|class) * P(class) ) / P(train_features)
     """
     # Saving the selected features
-    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,12])
-    feature1 = reduced_train[:, 0] # flavanoidsm!!!
-    feature2 = reduced_train[:, 1] # proline!!!
+    reduced_train, reduced_test = reduce_data(train_set, test_set, [6,9])
+    feature1 = reduced_train[:, 0] 
+    feature2 = reduced_train[:, 1] 
 
     predicted = np.zeros((reduced_test.shape[0], 1))
 
@@ -345,9 +241,6 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     for i in range(reduced_test.shape[0]):
         posterior = [0, 0, 0] # this is the array that will store the probabilities
 
-        #the_pairs = np.array([[1, 1],[2, 1],[1, 2], [2, 2], [1, 3], [2, 3]])
-        #print(the_pairs)
-
         npdf = lambda x, mean, var: ( 1.0 / ( np.sqrt( 2.0*np.pi*var)) ) * np.exp( (-(x-mean)**2.0) / (2.0 * var) )
         likelihood = lambda f, c: npdf(reduced_test[i][f-1], mean_pairs[f-1][c-1], var_pairs[f-1][c-1] )
 
@@ -364,23 +257,19 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     # ----------- CONFUSION MATRIX ------------------------------------------
     confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
     print("CONFUSION MATRIX: ")
-    print(confuMat)
+    #print(confuMat)
 
     # Plotting the confu mat
-    #fig, a = plt.subplots()
-    #plt.title("Confusion Matrix")
-    #plot_matrix(confuMat, ax = a)
+    fig, a = plt.subplots()
+    plt.title("Confusion Matrix for Naive Bayes Classifier")
+    plot_matrix(confuMat, ax = a)
 
     return predicted
 
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
-    # write your code here and make sure you return the predictions at the end of 
-    # the function
-
+    ## STILL NEED TO DECIDE A THIRD FEATURE
     reduced_train, reduced_test = reduce_data(train_set, test_set, [6, 9, 12])
-    #print(reduced_train)
-    #print(reduced_test)
-
+  
     predicted = np.zeros((reduced_test.shape[0], 1))
 
     #func to find the dist
@@ -388,26 +277,18 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
      
     # for loop to go through each test points
     for i in range(0, reduced_test.shape[0]):
-        # store the current test data point
         testPoint = reduced_test[i]
 
-        #Calculate the distance between test data and each row of training data.
         dist_test_to_train = lambda testPoint : [dist(testPoint, train) for train in reduced_train]
-
         results = dist_test_to_train(testPoint)
-        #print(len(results))
 
-        # Selecting minimum k distances
-        # sortedDist = np.sort(results)
         closestIndexs = np.argsort(results)[:k]
  
-        #Get the most frequent class of these rows
         classes = []
         freqClass = []
         for index in closestIndexs:
             classes.append(train_labels[index])
 
-        # PICK THE MOST FRQUEST CLASS 
         freqClass = np.argmax(np.bincount(classes))
 
         predicted[i] = freqClass
@@ -433,10 +314,7 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
  PCA STUFF WOOT WOOT ------------------------------------------------------------
 '''
 def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
-    colours = np.zeros_like(train_labels, dtype=np.object)
-    colours[train_labels == 1] = CLASS_1_C
-    colours[train_labels == 2] = CLASS_2_C
-    colours[train_labels == 3] = CLASS_3_C
+    colours = set_colours()
 
     # creating PCA object
     pca = PCA(n_components=2)
@@ -450,12 +328,6 @@ def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
     plt.show()
 
     # Running knn -----------------------------------------------------------------------
-    '''
-    K VALUE IS HARDCODED SHOULD PROBABLY CHANGE THIS BUT IDK HOW :P
-    '''
-    # SET K HERE:
-    k = 5
-    # ------------------
     predicted = np.zeros((pca_red_test.shape[0], 1))
     dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
      
@@ -480,7 +352,15 @@ def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
     accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
     print("ACCURACY: " + str(accuracy))
 
+    # ----------- CONFUSION MATRIX ------------------------------------------
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
+    print(confuMat)
     
+    # Plotting the confu mat
+    fig, a = plt.subplots()
+    plt.title("Confusion Matrix")
+    plot_matrix(confuMat, ax = a)
 
     return predicted
 
@@ -519,20 +399,20 @@ if __name__ == '__main__':
         predictions = knn(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)
 
-        '''
+        
         # checking things
         neigh = KNeighborsClassifier(n_neighbors=7)
-        neigh.fit(train_set[:,[6,12]], train_labels)
+        neigh.fit(train_set[:,[6,9]], train_labels)
         print("comp predicted: ")
-        comp = neigh.predict(test_set[:, [6,12]]) 
+        comp = neigh.predict(test_set[:, [6,9]]) 
         print( comp )
         print("comp accuracy: ")
-        print(neigh.score(test_set[:, [6,12]], test_labels, sample_weight=None))
+        print(neigh.score(test_set[:, [6,9]], test_labels, sample_weight=None))
         
         for i in range(0, predictions.shape[0]):
             if (predictions[i] != comp[i]):
                 print("uh oh", i)
-        '''
+        
 
     elif mode == 'alt':
         predictions = alternative_classifier(train_set, train_labels, test_set, test_labels=test_labels)
@@ -541,12 +421,12 @@ if __name__ == '__main__':
         # some more checkings
         
         gnb = GaussianNB()
-        gnb.fit(train_set[:,[6,12]], train_labels)
+        gnb.fit(train_set[:,[6,9]], train_labels)
         print("comp predicted: ")
-        comp = gnb.predict(test_set[:, [6,12]]) 
+        comp = gnb.predict(test_set[:, [6,9]]) 
         print( comp )
         print("comp accuracy: ")
-        print(gnb.score(test_set[:, [6,12]], test_labels, sample_weight=None))
+        print(gnb.score(test_set[:, [6, 9]], test_labels, sample_weight=None))
 
         for i in range(0, predictions.shape[0]):
             if (predictions[i] != comp[i]):

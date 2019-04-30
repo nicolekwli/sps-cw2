@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from scipy.spatial import Voronoi, voronoi_plot_2d
-import matplotlib.colors
+from matplotlib.colors import ListedColormap
 
 from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
@@ -129,6 +129,8 @@ def plot_voronoi_knn(reduced_train, reduced_test, train_labels, test_labels, fea
     Displays the scattered test data
     Doesnt work for features 6,12 for some godforsaken reason
     """
+    colours = [CLASS_1_C, CLASS_2_C, CLASS_3_C]
+
     centroids, classes = calculate_centroids(reduced_train, train_labels, test_labels)
     vor = Voronoi(centroids)
     
@@ -163,6 +165,43 @@ def plot_voronoi_knn(reduced_train, reduced_test, train_labels, test_labels, fea
     plt.show()
 
 
+# Plots the voronoi for bayes
+def plot_voronoi_bayes(reduced_train, reduced_test, train_labels, test_labels, features):
+    colours = [CLASS_1_C, CLASS_2_C, CLASS_3_C]
+
+    centroids, classes = calculate_centroids(reduced_train, train_labels, test_labels)
+    vor = Voronoi(centroids)
+    
+    clf = GaussianNB()
+    clf.fit(reduced_train, train_labels)
+    #comp = gnb.predict(test_set[:, [6,9]]) 
+
+    h = .02
+    X = reduced_train
+    Y = train_labels
+    cmap_light = ListedColormap(['#95b0ff', '#ffad91', '#ffee9b'])
+    cmap_bold = ListedColormap(['#3366ff', '#cc3300', '#ffc34d'])
+    
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    
+    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    # train regions
+    plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
+
+    # test scatter plot
+    for c_idx, c in enumerate(classes):
+        idx = test_labels == c
+        plt.scatter(reduced_test[idx, 0], reduced_test[idx, 1], s=50, c=colours[c_idx], edgecolor='k')
+
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+
+    plt.title('Voronoi: features {} and {}'.format(features[0] + 1, features[1] + 1))
+    plt.show()
 
 
 '''
@@ -326,6 +365,9 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     plt.title("Confusion Matrix for Naive Bayes Classifier")
     plot_matrix(confuMat, ax = a)
 
+    # ----------- VORONOI ----------------------------------------------------
+    plot_voronoi_bayes(reduced_train, reduced_test, train_labels, test_labels, [6, 9])
+    
     return predicted
 
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):

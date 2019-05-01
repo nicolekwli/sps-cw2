@@ -23,7 +23,6 @@ from matplotlib.colors import ListedColormap
 from scipy.stats import norm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from utilities import load_data, print_features, print_predictions
@@ -44,6 +43,20 @@ def set_colours(train_labels):
     return colours
 
 def feature_selection(train_set, train_labels, **kwargs):
+    colours = set_colours(train_labels)
+
+    ### attempt to display 13 x 13 things
+    #n_features = train_set.shape[1]
+
+    # this is code for outputting 3d stuff
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(train_set[:, 6], train_set[:, 9], train_set[:, 12], c=colours)
+    plt.title("Features 7 vs 10 vs 13")
+    plt.show()
+
     # The selected features are 7 and 10
     # The indices are 6 and 9
     return [6, 9]
@@ -100,6 +113,7 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
     return confuMatrix
 
 
+
 '''
 VORONOI FUNCTIONS -----------------------------------------------------------------------
 '''
@@ -116,6 +130,7 @@ def plot_voronoi_knn(reduced_train, reduced_test, train_labels, test_labels, fea
     """
     Displays the voronoi separation of the classes based on train data
     Displays the scattered test data
+    Doesnt work for features 6,12 for some godforsaken reason
     """
     colours = [CLASS_1_C, CLASS_2_C, CLASS_3_C]
 
@@ -268,25 +283,25 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
 
         predicted[i] = freqClass
     
+    
     # ----------- ACCURACY --------------------------------------------------
-    #accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
-    #print("ACCURACY: " + str(accuracy))
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
 
     # ----------- CONFUSION MATRIX ------------------------------------------
-    #confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
-    #print("CONFUSION MATRIX: ")
-    #print(confuMat)
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
+    print(confuMat)
     
     # Plotting the confu mat
-    #fig, a = plt.subplots()
-    #plt.title("k = {}".format(k))
-    #plot_matrix(confuMat, ax = a)
+    fig, a = plt.subplots()
+    plt.title("k = {}".format(k))
+    plot_matrix(confuMat, ax = a)
 
     # ----------- VORONOI ----------------------------------------------------
-    #plot_voronoi_knn(reduced_train, reduced_test, train_labels, test_labels, selected_features, k)
+    plot_voronoi_knn(reduced_train, reduced_test, train_labels, test_labels, selected_features, k)
     
     return predicted
-
 
 '''
 FUNCTIONS THAT THEY GAVE TO US -------------------------------------------------------------
@@ -340,26 +355,26 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
         predicted[i] = np.argmax(posterior) + 1
 
     # ----------- ACCURACY --------------------------------------------------
-    #accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
-    #print("ACCURACY: " + str(accuracy))
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
 
     # ----------- CONFUSION MATRIX ------------------------------------------
-    #confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
-    #rint("CONFUSION MATRIX: ")
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
     #print(confuMat)
 
     # Plotting the confu mat
-    f#ig, a = plt.subplots()
-    #plt.title("Confusion Matrix for Naive Bayes Classifier")
-    #plot_matrix(confuMat, ax = a)
+    fig, a = plt.subplots()
+    plt.title("Confusion Matrix for Naive Bayes Classifier")
+    plot_matrix(confuMat, ax = a)
 
     # ----------- VORONOI ----------------------------------------------------
-    #plot_voronoi_bayes(reduced_train, reduced_test, train_labels, test_labels, [6, 9])
+    plot_voronoi_bayes(reduced_train, reduced_test, train_labels, test_labels, [6, 9])
     
     return predicted
 
-
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
+    ## STILL NEED TO DECIDE A THIRD FEATURE
     reduced_train, reduced_test = reduce_data(train_set, test_set, [6, 9, 12])
   
     predicted = np.zeros((reduced_test.shape[0], 1))
@@ -387,21 +402,20 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
 
 
     # ----------- ACCURACY --------------------------------------------------
-    #accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
-    #print("ACCURACY: " + str(accuracy))
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
 
     # ----------- CONFUSION MATRIX ------------------------------------------
-    #confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
-    #print("CONFUSION MATRIX: ")
-    #rint(confuMat)
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    print("CONFUSION MATRIX: ")
+    print(confuMat)
     
     # Plotting the confu mat
-    #fig, a = plt.subplots()
-    #plt.title("k = {}".format(k))    
-    #plot_matrix(confuMat, ax = a)
+    fig, a = plt.subplots()
+    plt.title("k = {}".format(k))    
+    plot_matrix(confuMat, ax = a)
 
     return predicted
-
 
 '''
  PCA STUFF WOOT WOOT ---------------------------------------------------------------------
@@ -442,21 +456,34 @@ def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
     # end of knn ------------------------------------------------------------------------
 
     # ----------- ACCURACY --------------------------------------------------
-    #accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
-    #print("ACCURACY: " + str(accuracy))
+    accuracy = calculate_accuracy(kwargs["test_labels"], predicted)
+    print("ACCURACY: " + str(accuracy))
 
     # ----------- CONFUSION MATRIX ------------------------------------------
-    #confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
+    confuMat = calculate_confusion_matrix(kwargs["test_labels"], predicted)
     #print("CONFUSION MATRIX: ")
     #print(confuMat)
     
     # Plotting the confu mat
-    #fig, a = plt.subplots()
-    #plt.title("k = {}".format(k))
-    #plot_matrix(confuMat, ax = a)
-
+    fig, a = plt.subplots()
+    plt.title("k = {}".format(k))
+    plot_matrix(confuMat, ax = a)
     # ----------- VORONOI ----------------------------------------------------
     #plot_voronoi_knn(pca_red_train, pca_red_test, train_labels, test_labels, [100,100], k)
+    
+
+    # checking using scipy
+    neigh = KNeighborsClassifier(n_neighbors=7)
+    neigh.fit(pca_red_train, train_labels)
+    print("comp predicted: ")
+    comp = neigh.predict(pca_red_test) 
+    print( comp )
+    print("comp accuracy: ")
+    print(neigh.score(pca_red_test, test_labels, sample_weight=None))
+    
+    for i in range(0, predicted.shape[0]):
+        if (predicted[i] != comp[i]):
+            print("uh oh", i)
 
     return predicted
 
@@ -495,12 +522,59 @@ if __name__ == '__main__':
     elif mode == 'knn':
         predictions = knn(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(predictions)
+
+        
+        # checking things
+        neigh = KNeighborsClassifier(n_neighbors=7)
+        neigh.fit(train_set[:,[6,9]], train_labels)
+        print("comp predicted: ")
+        comp = neigh.predict(test_set[:, [6,9]]) 
+        print( comp )
+        print("comp accuracy: ")
+        print(neigh.score(test_set[:, [6,9]], test_labels, sample_weight=None))
+        
+        for i in range(0, predictions.shape[0]):
+            if (predictions[i] != comp[i]):
+                print("uh oh", i)
+        
+
     elif mode == 'alt':
         predictions = alternative_classifier(train_set, train_labels, test_set, test_labels=test_labels)
         print_predictions(predictions)
+
+        # some more checkings
+        
+        gnb = GaussianNB()
+        gnb.fit(train_set[:,[6,9]], train_labels)
+        print("comp predicted: ")
+        comp = gnb.predict(test_set[:, [6,9]]) 
+        print( comp )
+        print("comp accuracy: ")
+        print(gnb.score(test_set[:, [6, 9]], test_labels, sample_weight=None))
+
+        for i in range(0, predictions.shape[0]):
+            if (predictions[i] != comp[i]):
+                print("uh oh", i)
+        
     elif mode == 'knn_3d':
         predictions = knn_three_features(train_set, train_labels, test_set, args.k, test_labels=test_labels)
-        print_predictions(predictions)        
+        print_predictions(predictions)
+
+
+        # checking things
+        neigh = KNeighborsClassifier(n_neighbors=7)
+        neigh.fit(train_set[:,[6,9,12]], train_labels)
+        print("comp predicted: ")
+        comp = neigh.predict(test_set[:, [6,9,12]]) 
+        print( comp )
+        print("comp accuracy: ")
+        print(neigh.score(test_set[:, [6,9,12]], test_labels, sample_weight=None))
+        
+        for i in range(0, predictions.shape[0]):
+            if (predictions[i] != comp[i]):
+                print("uh oh", i)
+        
+
     elif mode == 'knn_pca':
         prediction = knn_pca(train_set, train_labels, test_set, args.k, test_labels=test_labels)
         print_predictions(prediction)

@@ -21,8 +21,8 @@ from scipy.spatial import Voronoi, voronoi_plot_2d
 from matplotlib.colors import ListedColormap
 
 from scipy.stats import norm
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
+#from sklearn.neighbors import KNeighborsClassifier
+#from sklearn.naive_bayes import GaussianNB
 
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
